@@ -1,6 +1,28 @@
 # The Data Hub
-
 A small Express REST API server for a mock Blog resource. In-memory storage for now (DB comes in Sprint 10), custom request logging middleware, and a mock login endpoint that hands back a JWT-shaped token.
+
+## Screenshots
+
+**GET /posts — initial state**
+![GET all posts](screenshots/get-posts.png)
+
+**POST /posts — create a new post**
+![Create post](screenshots/post-create.png)
+
+**GET /posts — after creating**
+![GET posts after create](screenshots/get-posts-after.png)
+
+**PUT /posts/2 — update post**
+![Update post](screenshots/put-update.png)
+
+**DELETE /posts/2 — delete post**
+![Delete post](screenshots/delete-post.png)
+
+**GET /posts — confirms deletion**
+![GET posts after delete](screenshots/get-posts-final.png)
+
+**POST /login — mock JWT token**
+![Mock JWT login](screenshots/post-login.png)
 
 **Live API:** https://data-hub-5hv9.onrender.com
 
@@ -30,26 +52,6 @@ data-hub/
 | PUT    | /posts/:id   | Update an existing post   |
 | DELETE | /posts/:id   | Delete a post              |
 | POST   | /login       | Mock login, returns fake JWT |
-
-## Screenshots
-
-**GET /posts**
-![GET all posts](screenshots/get-posts.png)
-
-**POST /posts**
-![Create post](screenshots/post-create.png)
-
-**PUT /posts/:id**
-![Update post](screenshots/put-update.png)
-
-**DELETE /posts/:id**
-![Delete post](screenshots/delete-post.png)
-
-**POST /login**
-![Mock JWT login](screenshots/post-login.png)
-
-**Logger middleware in action**
-![Server console logs](screenshots/logger-console.png)
 
 ## Testing in Postman / Thunder Client
 
@@ -96,9 +98,3 @@ Swap `localhost:5000` for the live Render URL above once it's deployed. Every re
 ```
 [GET] /posts - 10:05:23 AM
 ```
-
-## Notes / known limitations
-
-- Data resets on every server restart since it's just an array in memory, no real DB yet.
-- `/login` does NOT do real auth — no password hashing, no signature verification, no secret key. It just returns something shaped like a JWT so the endpoint demonstrates the right contract. Wiring up real verification felt out of scope until persistence exists anyway.
-- Deployed to Render instead of Vercel since Vercel's serverless functions aren't a great fit for a long-running Express server with in-memory state — state would reset between invocations.
