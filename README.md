@@ -1,12 +1,10 @@
-# The Data Hub — Sprint 09 (Track B: Fullstack)
-
-**Live API:** https://your-app-name.onrender.com  *(replace with your actual Render URL once deployed — free tier sleeps after inactivity, so hit it once to wake it up before testing)*
-
-**Repo:** https://github.com/ashish-bisht-iot/data-hub
+# The Data Hub
 
 A small Express REST API server for a mock Blog resource. In-memory storage for now (DB comes in Sprint 10), custom request logging middleware, and a mock login endpoint that hands back a JWT-shaped token.
 
-This was my first time building the "provider" side instead of just consuming an API — felt very different from the React sprints, mostly because there's no UI feedback loop, just whatever Postman tells you.
+**Live API:** https://data-hub-5hv9.onrender.com
+
+**Repo:** https://github.com/ashish-bisht-iot/data-hub
 
 ## Project structure
 
@@ -22,17 +20,6 @@ data-hub/
 └── README.md
 ```
 
-## Setup
-
-```bash
-npm install
-npm run dev   # nodemon, auto-restarts on save
-# or
-npm start     # plain node
-```
-
-Runs locally on `http://localhost:5000`.
-
 ## Endpoints
 
 | Method | Route        | Description              |
@@ -43,6 +30,26 @@ Runs locally on `http://localhost:5000`.
 | PUT    | /posts/:id   | Update an existing post   |
 | DELETE | /posts/:id   | Delete a post              |
 | POST   | /login       | Mock login, returns fake JWT |
+
+## Screenshots
+
+**GET /posts**
+![GET all posts](screenshots/get-posts.png)
+
+**POST /posts**
+![Create post](screenshots/post-create.png)
+
+**PUT /posts/:id**
+![Update post](screenshots/put-update.png)
+
+**DELETE /posts/:id**
+![Delete post](screenshots/delete-post.png)
+
+**POST /login**
+![Mock JWT login](screenshots/post-login.png)
+
+**Logger middleware in action**
+![Server console logs](screenshots/logger-console.png)
 
 ## Testing in Postman / Thunder Client
 
@@ -95,14 +102,3 @@ Swap `localhost:5000` for the live Render URL above once it's deployed. Every re
 - Data resets on every server restart since it's just an array in memory, no real DB yet.
 - `/login` does NOT do real auth — no password hashing, no signature verification, no secret key. It just returns something shaped like a JWT so the endpoint demonstrates the right contract. Wiring up real verification felt out of scope until persistence exists anyway.
 - Deployed to Render instead of Vercel since Vercel's serverless functions aren't a great fit for a long-running Express server with in-memory state — state would reset between invocations.
-
-## What I'd improve next
-
-If I had more time / this carries into Sprint 10, I'd want to:
-- Swap the in-memory array for an actual database so data survives restarts
-- Add real input validation (right now it's a pretty bare check for missing fields)
-- Add proper JWT signing + a verification middleware to actually protect routes, instead of just mocking the token shape
-
-## Prompts.md
-
-Debugging log lives in `Prompts.md` — mostly real "why is this undefined" moments from building this out.
