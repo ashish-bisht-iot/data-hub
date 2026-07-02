@@ -2,6 +2,7 @@
 A small Express REST API server for a mock Blog resource. In-memory storage for now, custom request logging middleware, and a mock login endpoint that hands back a JWT-shaped token.
 
 **GET /posts — initial state**
+
 ![GET all posts](screenshots/get-posts.png)
 
 **POST /posts — create a new post**
@@ -39,7 +40,7 @@ data-hub/
 ├── middleware/
 │   └── logger.js          # logs method + path + timestamp for every request
 ├── Prompts.md             # debugging log
-└── README.md
+└── README.md              # description
 ```
 
 ## Endpoints
@@ -92,11 +93,6 @@ Body (JSON):
   "username": "ashish",
   "password": "anything"
 }
-```
-
-Swap `localhost:5000` for the live Render URL above once it's deployed. Every request — local or live — gets logged in the server console like:
-```
-[GET] /posts - 10:05:23 AM
 ```
 
 **Live API:** https://data-hub-5hv9.onrender.com

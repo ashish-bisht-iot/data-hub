@@ -1,7 +1,7 @@
 {
   "name": "data-hub",
   "version": "1.0.0",
-  "description": "Sprint 09 - The Data Hub (RESTful API Server)",
+  "description": "The Data Hub - RESTful API Server",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

@@ -1,10 +1,6 @@
-// routes/auth.js
 const express = require("express");
 const router = express.Router();
 
-// POST /login - mock auth, just checks fields exist and hands back a fake JWT
-// NOTE: this is NOT a real JWT (no signing, no secret). Just a 3-part base64-ish
-// string so the shape looks right for the demo. Real auth is a later sprint.
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
 
