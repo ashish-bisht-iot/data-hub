@@ -1,8 +1,7 @@
 # The Data Hub
-A small Express REST API server for a mock Blog resource. In-memory storage for now (DB comes in Sprint 10), custom request logging middleware, and a mock login endpoint that hands back a JWT-shaped token.
+A small Express REST API server for a mock Blog resource. In-memory storage for now, custom request logging middleware, and a mock login endpoint that hands back a JWT-shaped token.
 
 **GET /posts — initial state**
-
 ![GET all posts](screenshots/get-posts.png)
 
 **POST /posts — create a new post**
