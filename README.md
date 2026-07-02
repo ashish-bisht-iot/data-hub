@@ -24,10 +24,6 @@ A small Express REST API server for a mock Blog resource. In-memory storage for 
 **POST /login — mock JWT token**
 ![Mock JWT login](screenshots/post-login.png)
 
-**Live API:** https://data-hub-5hv9.onrender.com
-
-**Repo:** https://github.com/ashish-bisht-iot/data-hub
-
 ## Project structure
 
 ```
@@ -98,3 +94,7 @@ Swap `localhost:5000` for the live Render URL above once it's deployed. Every re
 ```
 [GET] /posts - 10:05:23 AM
 ```
+
+**Live API:** https://data-hub-5hv9.onrender.com
+
+**Repo:** https://github.com/ashish-bisht-iot/data-hub
