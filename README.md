@@ -1,65 +1,89 @@
 # The Data Hub
-A small Express REST API server for a mock Blog resource. In-memory storage for now, custom request logging middleware, and a mock login endpoint that hands back a JWT-shaped token.
+An Express REST API for a Blog/Post resource, now backed by MongoDB Atlas via Mongoose instead of an in-memory array. Includes relational modeling (Post → User via `authorId`), a `.populate()`-hydrated author on read, a recent-posts aggregation route, and custom request logging middleware.
 
-**GET /posts — initial state**
+## What changed since Sprint 09
 
-![GET all posts](screenshots/get-posts.png)
+Sprint 09 stored posts in a plain JS array, so all data vanished on every server restart. Sprint 10 replaces that with a live MongoDB Atlas cluster (M0 free tier), connected through Mongoose. Posts now persist across restarts and deployments, and each post references a real User document.
 
-**POST /posts — create a new post**
+**POST /users — create an author**
+
+![Create user](screenshots/post-create-user.png)
+
+**POST /posts — create a post with authorId**
 
 ![Create post](screenshots/post-create.png)
 
-**GET /posts — after creating**
+**GET /posts — authorId populated with full user data**
 
-![GET posts after create](screenshots/get-posts-after.png)
+![Populated posts](screenshots/get-posts-populated.png)
 
-**PUT /posts/2 — update post**
+**GET /posts/recent — top 3 most recent, populated**
 
-![Update post](screenshots/put-update.png)
+![Recent posts](screenshots/get-posts-recent.png)
 
-**DELETE /posts/2 — delete post**
+**MongoDB Atlas — posts collection (raw authorId reference)**
 
-![Delete post](screenshots/delete-post.png)
+![Atlas posts collection](screenshots/atlas-posts.png)
 
-**GET /posts — confirms deletion**
+**MongoDB Atlas — users collection**
 
-![GET posts after delete](screenshots/get-posts-final.png)
-
-**POST /login — mock JWT token**
-
-![Mock JWT login](screenshots/post-login.png)
+![Atlas users collection](screenshots/atlas-users.png)
 
 ## Project structure
 
 ```
 data-hub/
-├── server.js              # app setup, mounts middleware + routes, starts on port 5000
+├── server.js              # app setup, connects to MongoDB, mounts middleware + routes
+├── db.js                  # Mongoose connection to Atlas
+├── models/
+│   ├── Post.js             # Post schema (title, content, authorId ref, createdAt)
+│   └── User.js             # User schema (name, email, createdAt)
 ├── routes/
-│   ├── posts.js           # all 5 CRUD endpoints for the Blog resource
-│   └── auth.js            # mock /login endpoint
+│   ├── posts.js             # CRUD + /posts/recent aggregation, .populate() on read
+│   ├── users.js              # create/list users
+│   └── auth.js                # mock /login endpoint
 ├── middleware/
-│   └── logger.js          # logs method + path + timestamp for every request
-├── Prompts.md             # debugging log
-└── README.md              # description
+│   └── logger.js               # logs method + path + timestamp for every request
+├── .env                          # MONGO_URI, PORT (not committed)
+├── .env.example                   # placeholder template for MONGO_URI
+├── Prompts.md                      # debugging log
+└── README.md                        # this file
 ```
 
 ## Endpoints
 
-| Method | Route        | Description              |
-|--------|--------------|---------------------------|
-| GET    | /posts       | Get all posts             |
-| GET    | /posts/:id   | Get a single post by id   |
-| POST   | /posts       | Create a new post         |
-| PUT    | /posts/:id   | Update an existing post   |
-| DELETE | /posts/:id   | Delete a post              |
-| POST   | /login       | Mock login, returns fake JWT |
+| Method | Route          | Description                                          |
+|--------|----------------|-------------------------------------------------------|
+| GET    | /posts         | Get all posts, author populated                      |
+| GET    | /posts/:id     | Get a single post by id, author populated             |
+| GET    | /posts/recent  | Get the 3 most recent posts, sorted, author populated |
+| POST   | /posts         | Create a new post (requires title, content, authorId) |
+| PUT    | /posts/:id     | Update an existing post                                |
+| DELETE | /posts/:id     | Delete a post                                          |
+| POST   | /users         | Create a new user (name, email)                        |
+| GET    | /users         | List all users                                          |
+| POST   | /login         | Mock login, returns fake JWT                            |
 
-## Testing in Postman / Thunder Client
+## Database
 
-**Get all posts**
+- **Provider:** MongoDB Atlas (M0 free tier)
+- **ODM:** Mongoose
+- **Database name:** `data_hub`
+- **Collections:** `posts`, `users`
+- **Relationship:** each `Post.authorId` references a `User._id`. Reading a post via the API hydrates that reference into the full user object via `.populate("authorId", "name email")`. Viewed directly in Atlas, `authorId` shows only the raw `ObjectId` — the populated view only happens through the API layer.
+
+## Testing in Thunder Client
+
+**Create a user first (required before creating a post)**
 ```
-GET /posts
+POST /users
+Body (JSON):
+{
+  "name": "Ashish Bisht",
+  "email": "ashish@example.com"
+}
 ```
+Copy the `_id` from the response.
 
 **Create a post**
 ```
@@ -67,33 +91,31 @@ POST /posts
 Body (JSON):
 {
   "title": "My first post",
-  "content": "Testing the API"
+  "content": "Testing the API",
+  "authorId": "PASTE_USER_ID_HERE"
 }
 ```
 
-**Update a post**
+**Get all posts / recent posts**
 ```
-PUT /posts/1
-Body (JSON):
-{
-  "title": "Updated title"
-}
+GET /posts
+GET /posts/recent
 ```
 
-**Delete a post**
+**Update / delete a post**
 ```
-DELETE /posts/1
+PUT /posts/:id
+DELETE /posts/:id
 ```
 
-**Mock login**
+## Environment variables
+
+Create a `.env` file (see `.env.example`) with:
 ```
-POST /login
-Body (JSON):
-{
-  "username": "ashish",
-  "password": "anything"
-}
+MONGO_URI="your_atlas_connection_string"
+PORT=5000
 ```
+`.env` is git-ignored and never committed. Atlas Network Access is set to allow `0.0.0.0/0` so the deployed Render service can connect.
 
 **Live API:** https://data-hub-5hv9.onrender.com
 
