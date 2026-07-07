@@ -1,65 +1,94 @@
 const express = require("express");
 const router = express.Router();
+const Post = require("../models/Post");
 
-let blogPosts = [
-  { id: 1, title: "Welcome to The Data Hub", content: "First seeded post for testing." },
-];
-
-let nextId = 2;
-router.get("/", (req, res) => {
-  res.json(blogPosts);
+router.get("/recent", async (req, res) => {
+  try {
+    const recentPosts = await Post.find()
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .populate("authorId", "name email");
+    res.json(recentPosts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
-router.get("/:id", (req, res) => {
-  const post = blogPosts.find((p) => p.id === parseInt(req.params.id));
-
-  if (!post) {
-    return res.status(404).json({ message: "Post not found" });
+router.get("/", async (req, res) => {
+  try {
+    const posts = await Post.find().populate("authorId", "name email");
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-
-  res.json(post);
 });
 
-router.post("/", (req, res) => {
-  const { title, content } = req.body;
+router.get("/:id", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id).populate(
+      "authorId",
+      "name email"
+    );
 
-  if (!title || !content) {
-    return res.status(400).json({ message: "title and content are required" });
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-
-  const newPost = {
-    id: nextId++,
-    title,
-    content,
-  };
-
-  blogPosts.push(newPost);
-  res.status(201).json(newPost);
 });
 
-router.put("/:id", (req, res) => {
-  const post = blogPosts.find((p) => p.id === parseInt(req.params.id));
+router.post("/", async (req, res) => {
+  try {
+    const { title, content, authorId } = req.body;
 
-  if (!post) {
-    return res.status(404).json({ message: "Post not found" });
+    if (!title || !content) {
+      return res
+        .status(400)
+        .json({ message: "title and content are required" });
+    }
+
+    const newPost = await Post.create({ title, content, authorId });
+    res.status(201).json(newPost);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
-
-  const { title, content } = req.body;
-  if (title) post.title = title;
-  if (content) post.content = content;
-
-  res.json(post);
 });
 
-router.delete("/:id", (req, res) => {
-  const exists = blogPosts.some((p) => p.id === parseInt(req.params.id));
+router.put("/:id", async (req, res) => {
+  try {
+    const { title, content } = req.body;
 
-  if (!exists) {
-    return res.status(404).json({ message: "Post not found" });
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (title) post.title = title;
+    if (content) post.content = content;
+
+    await post.save();
+    res.json(post);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
+});
 
-  blogPosts = blogPosts.filter((p) => p.id !== parseInt(req.params.id));
-  res.json({ message: "Post deleted" });
+router.delete("/:id", async (req, res) => {
+  try {
+    const deleted = await Post.findByIdAndDelete(req.params.id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.json({ message: "Post deleted", post: deleted });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 module.exports = router;
+
