@@ -115,8 +115,6 @@ Create a `.env` file (see `.env.example`) with:
 MONGO_URI="your_atlas_connection_string"
 PORT=5000
 ```
-`.env` is git-ignored and never committed. Atlas Network Access is set to allow `0.0.0.0/0` so the deployed Render service can connect.
 
 **Live API:** https://data-hub-5hv9.onrender.com
-
 **Repo:** https://github.com/ashish-bisht-iot/data-hub
