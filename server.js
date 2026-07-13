@@ -17,7 +17,6 @@ app.use(requestLogger);
 app.use("/posts", postsRouter);
 app.use("/users", usersRouter);
 app.use("/", authRouter);
-
 app.get("/", (req, res) => {
   res.json({ message: "Data Hub API is running" });
 });
