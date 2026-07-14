@@ -21,7 +21,7 @@ Sprint 09 stored posts in a plain JS array, so all data vanished on every server
 
 ![Recent posts](screenshots/get-posts-recent.png)
 
-**MongoDB Atlas — posts collection (raw authorId reference)**
+**MongoDB Atlas — posts collection**
 
 ![Atlas posts collection](screenshots/atlas-posts.png)
 
