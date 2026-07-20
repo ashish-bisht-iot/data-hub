@@ -1,25 +1,41 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
-router.post("/login", (req, res) => {
-  const { username, password } = req.body;
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ message: "username and password are required" });
+    if (!email || !password) {
+      return res.status(400).json({ message: "email and password are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.json({
+      message: "Login successful",
+      token,
+      user: { id: user._id, name: user.name, email: user.email },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-
-  const fakeHeader = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64");
-  const fakePayload = Buffer.from(
-    JSON.stringify({ user: username, iat: Date.now() })
-  ).toString("base64");
-  const fakeSignature = "mocksignature123";
-
-  const mockToken = `${fakeHeader}.${fakePayload}.${fakeSignature}`;
-
-  res.json({
-    message: "Login successful (mock)",
-    token: mockToken,
-  });
 });
 
 module.exports = router;
