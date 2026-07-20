@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");
 const requestLogger = require("./middleware/logger");
 const postsRouter = require("./routes/posts");
 const usersRouter = require("./routes/users");
@@ -12,11 +13,17 @@ connectDB();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use(requestLogger);
 app.use("/posts", postsRouter);
 app.use("/users", usersRouter);
 app.use("/", authRouter);
+
 app.get("/", (req, res) => {
   res.json({ message: "Data Hub API is running" });
 });
