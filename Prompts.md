@@ -39,24 +39,24 @@ Documents every AI interaction during this project.
 
 ---
 
-**Prompt 7:** before I push, how do I actually check that my .env file isn't going to get committed by accident
-
-**What I learned:** `git status` shows tracked/staged changes, so if .env doesn't appear anywhere in that output (not even under untracked), it means .gitignore is correctly excluding it. I also asked about commit structure and learned it's better to group commits by what they logically change — server/config code, then env example + gitignore, then screenshots, then README last — instead of dumping everything into one commit, since it makes the history easier to read later.
-
+**Prompt 7:** I don't want to just push and hope for the best — walk me through how to actually verify my .env isn't going to leak into the commit, and help me understand what a "clean" commit history should even look like here, not just give me the commands
+ 
+**What I learned:** `git status` shows tracked/staged changes, so if .env doesn't appear anywhere in that output (not even under untracked), it means .gitignore is correctly excluding it. I also understood *why* commit structure matters, not just how to do it — grouping commits by what they logically change (server/config code, then env example + gitignore, then screenshots, then README last) makes the project's history readable to someone else later, instead of one dump-everything commit that hides the reasoning behind each change.
+ 
 ---
-
-**Prompt 8:** my server works fine locally but Render logs show "MongoDB connection failed: the uri parameter must be a string, got undefined" — why would it work on my machine and not there
-
-**What I learned:** Render doesn't read my local .env file at all in production — environment variables have to be added manually in the Render dashboard's Environment tab, and the key name there has to match exactly what my code reads via process.env. My db.js was reading process.env.MONGO_URI, but I hadn't added that variable on Render (or had it under a different name). Adding it with the exact matching name and letting Render redeploy fixed it — confirmed by seeing "MongoDB connected: ..." in the logs instead of the error.
-
+ 
+**Prompt 8:** Mongoose keeps throwing a connection timeout / "could not connect to any servers" error even though my URI looks right — before I start randomly editing the connection string, help me understand what's actually going on here
+ 
+**What I learned:** the issue wasn't my code or my URI at all — Atlas blocks external IP addresses by default as a security measure, so my own machine's IP wasn't whitelisted under Network Access. Understanding *why* the block exists (not just how to remove it) made it click: it's a safeguard, not a bug I introduced. Added my IP (and 0.0.0.0/0 for dev purposes) under Network Access and the connection succeeded immediately after.
+ 
 ---
-
-**Prompt 9:** I'm planning my demo video and don't want to fumble on camera — how should I structure it so it actually proves the live deployment works, not just localhost
-
-**What I learned:** proving persistence means showing the same data in two places — the API response and the Atlas dashboard — right after each other, not just showing one or the other. I also realized my Post model needs a real user's authorId to demonstrate the populate() relationship properly, so the order matters: create the user first, copy its _id from the response, then use that id when creating the post. Otherwise the populated author field on GET /posts would be empty and the demo wouldn't actually prove the relationship works.
-
+ 
+**Prompt 9:** I understand populate() replaces a referenced ObjectId with the actual document, but I want to actually understand *why* my schema needs to be shaped a certain way for that to work, not just copy a populate() call and hope it runs
+ 
+**What I learned:** populate() only works because the Post schema's authorId field is explicitly typed as `mongoose.Schema.Types.ObjectId` with a `ref: 'User'` pointing at the model name — that ref is what tells Mongoose which collection to look in when it hydrates the field. Without declaring that relationship in the schema itself, calling .populate('authorId') would just silently return the raw ObjectId. Working through this myself also clarified why the User has to exist and be referenced *before* the Post is created — the relationship is enforced at the data level, not just the query level.
+ 
 ---
-
-**Prompt 10:** why does my Render app take forever to respond the first time I hit it after not using it for a while
-
-**What I learned:** free-tier Render instances spin down after a period of inactivity, so the first request has to "wake" the server back up, which can take 50+ seconds. It's not a bug in my code — it's a platform limitation of the free tier. For the demo video specifically, I learned to send one throwaway request before I start recording so the instance is already warm, instead of getting a dead pause in the middle of the video.
+ 
+**Prompt 10:** for the "Top 3 Most Recent Posts" route, I don't want to just ask for a working aggregation snippet — help me reason through what MongoDB is actually doing when it sorts and limits, so I understand the query instead of memorizing it
+ 
+**What I learned:** sorting by `createdAt: -1` orders documents newest-first because -1 means descending, and `.limit(3)` is applied *after* the sort, not before — so the order of chaining actually matters conceptually even if not syntactically. I also understood why this needs to happen at the database level via the query rather than fetching everything and slicing the array in JavaScript: it's far less efficient to pull the whole collection into memory just to discard most of it, especially as the Posts collection grows.
