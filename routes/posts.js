@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Post = require("../models/Post");
+const { upload, uploadToCloudinary } = require("../config/cloudinary");
 
 router.get("/recent", async (req, res) => {
   try {
@@ -40,7 +41,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", upload.single("image"), async (req, res) => {
   try {
     const { title, content, authorId } = req.body;
 
@@ -50,7 +51,18 @@ router.post("/", async (req, res) => {
         .json({ message: "title and content are required" });
     }
 
-    const newPost = await Post.create({ title, content, authorId });
+    let imageUrl = null;
+    if (req.file) {
+      const result = await uploadToCloudinary(req.file.buffer);
+      imageUrl = result.secure_url;
+    }
+
+    const newPost = await Post.create({
+      title,
+      content,
+      authorId,
+      imageUrl,
+    });
     res.status(201).json(newPost);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -91,4 +103,3 @@ router.delete("/:id", async (req, res) => {
 });
 
 module.exports = router;
-
